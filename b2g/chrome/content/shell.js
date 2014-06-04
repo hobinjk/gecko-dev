@@ -1000,7 +1000,7 @@ window.addEventListener('ContentStart', function ss_onContentStart() {
 // Listen for log requests sent by Gaia. This follows the screenshot model,
 // using a mozContentEvent with detail.type set to 'capture-log'. The logs are
 // then returned using a mozChromeEvent with detail.type 'capture-log-success' and
-// a log blob attached to detail.file
+// the log string attached to detail.log
 window.addEventListener('ContentStart', function captureLog_onContentStart() {
   let content = shell.contentBrowser.contentWindow;
   content.addEventListener('mozContentEvent', function captureLog_onMozContentEvent(e) {
@@ -1021,10 +1021,14 @@ window.addEventListener('ContentStart', function captureLog_onContentStart() {
 
     // omitting options parameter (charset and replacement character)
     // The log is a binary file (despite being mostly text) and attempting to
-    // parse it will explode
+    // parse it as having a character set will explode
     let logString = shell.NetUtils.readInputStreamToString(logStream, logStream.available());
 
-    // TODO handle log string
+    shell.sendEvent(getContentWindow(), 'mozChromeEvent', {
+      __exposedProps__: { type: 'r', log: 'r' },
+      type: 'capture-log-success',
+      log: logString
+    });
   });
 });
 
