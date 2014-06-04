@@ -107,6 +107,12 @@ var shell = {
 #endif
   },
 
+  get NetUtils() {
+    delete this.NetUtils;
+    Cu.import("resource://gre/modules/NetUtils.jsm", this);
+    return this.NetUtils;
+  },
+
   onlineForCrashReport: function shell_onlineForCrashReport() {
     let wifiManager = navigator.mozWifiManager;
     let onWifi = (wifiManager &&
@@ -988,6 +994,37 @@ window.addEventListener('ContentStart', function ss_onContentStart() {
         error: String(e)
       });
     }
+  });
+});
+
+// Listen for log requests sent by Gaia. This follows the screenshot model,
+// using a mozContentEvent with detail.type set to 'capture-log'. The logs are
+// then returned using a mozChromeEvent with detail.type 'capture-log-success' and
+// a log blob attached to detail.file
+window.addEventListener('ContentStart', function captureLog_onContentStart() {
+  let content = shell.contentBrowser.contentWindow;
+  content.addEventListener('mozContentEvent', function captureLog_onMozContentEvent(e) {
+    if (e.detail.type !== 'capture-log') {
+      return;
+    }
+
+    const nsILocalFile = CC("@mozilla.org/file/local;1", "nsILocalFile",
+                            "initWithPath");
+    const nsIFileInputStream = CC("@mozilla.org/network/file-input-stream;1",
+                           "nsIFileInputStream", "init");
+    // other logs exist, but system is most complete
+    let logFile = new nsILocalFile("/dev/log/system");
+
+    // 0x01 = PR_READONLY from https://mxr.mozilla.org/mozilla-central/source/nsprpub/pr/include/prio.h#588
+    // mode of 0666 is the default mode of /dev/log/system
+    let logInputStream = new nsIFileInputStream(logFile, 0x01, 0666, Ci.nsIFileInputStream.DEFER_OPEN);
+
+    // omitting options parameter (charset and replacement character)
+    // The log is a binary file (despite being mostly text) and attempting to
+    // parse it will explode
+    let logString = shell.NetUtils.readInputStreamToString(logStream, logStream.available());
+
+    // TODO handle log string
   });
 });
 
