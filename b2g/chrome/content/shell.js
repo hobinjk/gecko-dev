@@ -107,10 +107,10 @@ var shell = {
 #endif
   },
 
-  get NetUtils() {
-    delete this.NetUtils;
-    Cu.import("resource://gre/modules/NetUtils.jsm", this);
-    return this.NetUtils;
+  get NetUtil() {
+    delete this.NetUtil;
+    Cu.import("resource://gre/modules/NetUtil.jsm", this);
+    return this.NetUtil;
   },
 
   onlineForCrashReport: function shell_onlineForCrashReport() {
@@ -1000,7 +1000,7 @@ window.addEventListener('ContentStart', function ss_onContentStart() {
 // Listen for log requests sent by Gaia. This follows the screenshot model,
 // using a mozContentEvent with detail.type set to 'capture-log'. The logs are
 // then returned using a mozChromeEvent with detail.type 'capture-log-success' and
-// the log string attached to detail.log
+// the log attached to detail.log as a Uint8Array
 window.addEventListener('ContentStart', function captureLog_onContentStart() {
   let content = shell.contentBrowser.contentWindow;
   content.addEventListener('mozContentEvent', function captureLog_onMozContentEvent(e) {
@@ -1008,26 +1008,47 @@ window.addEventListener('ContentStart', function captureLog_onContentStart() {
       return;
     }
 
-    const nsILocalFile = CC("@mozilla.org/file/local;1", "nsILocalFile",
-                            "initWithPath");
-    const nsIFileInputStream = CC("@mozilla.org/network/file-input-stream;1",
-                           "nsIFileInputStream", "init");
-    // other logs exist, but system is most complete
-    let logFile = new nsILocalFile("/dev/log/system");
+    console.log('Logshake: time for log file!');
+    let logFile = Cc['@mozilla.org/file/local;1'].createInstance(Ci.nsILocalFile);
+    // other logs exist
+    logFile.initWithPath('/dev/log/main');
+    console.log('Logshake: exists? '+logFile.exists());
+    console.log('Logshake: isFile? '+logFile.isFile());
+    console.log('Logshake: isReadable? '+logFile.isReadable());
 
+    console.log('Logshake: log input stream!');
+    let logInput = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
     // 0x01 = PR_READONLY from https://mxr.mozilla.org/mozilla-central/source/nsprpub/pr/include/prio.h#588
-    // mode of 0666 is the default mode of /dev/log/system
-    let logInputStream = new nsIFileInputStream(logFile, 0x01, 0666, Ci.nsIFileInputStream.DEFER_OPEN);
+    // 0 is default (somehow)
+    // logInput.init(logFile, 0x01, 0666, 0);
+    logInput.init(logFile, -1, -1, 0);
+
+    let logStream = Cc["@mozilla.org/binaryinputstream;1"].
+              createInstance(Ci.nsIBinaryInputStream);
+    logStream.setInputStream(logInput);
+
+    let  logArray = new Uint8Array(256*1024); //arbitrary
+    let  something = 0;
+    try {
+      something = logStream.readArrayBuffer(256*1024, logArray.buffer);
+    } catch(e) {
+      // DONE WITH THIS NONSENSE
+    }
+    console.log('Logshake something: '+something);
+    var logBlob = new Blob([logArray],
+                           {type: 'application/octet-stream'});
+
 
     // omitting options parameter (charset and replacement character)
     // The log is a binary file (despite being mostly text) and attempting to
     // parse it as having a character set will explode
-    let logString = shell.NetUtils.readInputStreamToString(logStream, logStream.available());
+    // let available = logStream.available();
+    // console.log('Logshake: available '+available);
 
     shell.sendEvent(getContentWindow(), 'mozChromeEvent', {
       __exposedProps__: { type: 'r', log: 'r' },
       type: 'capture-log-success',
-      log: logString
+      log: logBlob
     });
   });
 });
