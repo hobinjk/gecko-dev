@@ -1021,17 +1021,18 @@ window.addEventListener('ContentStart', function captureLog_onContentStart() {
     // 0x01 = PR_READONLY from https://mxr.mozilla.org/mozilla-central/source/nsprpub/pr/include/prio.h#588
     // 0 is default (somehow)
     // logInput.init(logFile, 0x01, 0666, 0);
-    logInput.init(logFile, 0x01, -1, Ci.nsIFileInputStream.CLOSE_ON_EOF);
+    logInput.init(logFile, 0x01, 0666, 0); // Ci.nsIFileInputStream.CLOSE_ON_EOF);
     dump('Logshake: isNonBlocking? '+logInput.isNonBlocking()+'\n');
 
     let logStream = Cc["@mozilla.org/binaryinputstream;1"].
               createInstance(Ci.nsIBinaryInputStream);
     logStream.setInputStream(logInput);
 
-    let  logArray = new Uint8Array(256*1024); //arbitrary
+    let  logArray; // = new Uint8Array(256*1024); //arbitrary
     let  something = 0;
     try {
-      dump("WOOOOO: "+logStream.read8()+'\n');
+      logArray = logStream.readByteArray(1024);
+      dump("WOOOOO: "++'\n');
     } catch(e) {
       dump(e+'\n');
       // DONE WITH THIS NONSENSE
