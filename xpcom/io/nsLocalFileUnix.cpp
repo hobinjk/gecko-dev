@@ -395,7 +395,6 @@ nsLocalFile::OpenNSPRFileDesc(int32_t aFlags, int32_t aMode,
 {
   *aResult = PR_Open(mPath.get(), aFlags, aMode);
   if (! *aResult) {
-    __android_log_print(ANDROID_LOG_ERROR, "nsLocalFile", "errno is 0x%08x", errno);
     return NS_ErrorAccordingToNSPR();
   }
 

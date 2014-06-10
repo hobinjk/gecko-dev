@@ -200,9 +200,6 @@ nsresult
 nsFileStreamBase::Read(char* aBuf, uint32_t aCount, uint32_t* aResult)
 {
     nsresult rv = DoPendingOpen();
-    if(NS_FAILED(rv)) {
-      __android_log_print(ANDROID_LOG_ERROR, "nsFileStreamBase::Read", "DoPendingOpen errno is 0x%08x", errno);
-    }
     NS_ENSURE_SUCCESS(rv, rv);
 
     if (!mFD) {
@@ -212,7 +209,6 @@ nsFileStreamBase::Read(char* aBuf, uint32_t aCount, uint32_t* aResult)
 
     int32_t bytesRead = PR_Read(mFD, aBuf, aCount);
     if (bytesRead == -1) {
-        __android_log_print(ANDROID_LOG_ERROR, "nsFileStreamBase::Read", "PR_Read errno is 0x%08x", errno);
         return NS_ErrorAccordingToNSPR();
     }
 
@@ -341,7 +337,6 @@ nsFileStreamBase::DoOpen()
     CleanUpOpen();
 
     if (NS_FAILED(rv)) {
-        __android_log_print(ANDROID_LOG_ERROR, "nsFileStreamBase", "errno is 0x%08x", errno);
         return rv;
     }
     mFD = fd;
