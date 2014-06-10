@@ -335,10 +335,8 @@ nsFileStreamBase::DoOpen()
                                                           mOpenParams.perm,
                                                           &fd);
     CleanUpOpen();
-
-    if (NS_FAILED(rv)) {
+    if (NS_FAILED(rv))
         return rv;
-    }
     mFD = fd;
 
     return NS_OK;
