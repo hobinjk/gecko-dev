@@ -107,10 +107,10 @@ var shell = {
 #endif
   },
 
-  get NetUtil() {
-    delete this.NetUtil;
-    Cu.import("resource://gre/modules/NetUtil.jsm", this);
-    return this.NetUtil;
+  get LogCapture() {
+    delete this.LogCapture;
+    Cu.import("resource://gre/modules/devtools/LogCapture.jsm", this);
+    return this.LogCapture;
   },
 
   onlineForCrashReport: function shell_onlineForCrashReport() {
@@ -1008,56 +1008,12 @@ window.addEventListener('ContentStart', function captureLog_onContentStart() {
       return;
     }
 
-    dump('Logshake: time for log file!'+'\n');
-    let logFile = Cc['@mozilla.org/file/local;1'].createInstance(Ci.nsILocalFile);
     // other logs exist
-    logFile.initWithPath('/dev/log/main');
-    dump('Logshake: exists? '+logFile.exists()+'\n');
-    dump('Logshake: isFile? '+logFile.isFile()+'\n');
-    dump('Logshake: isReadable? '+logFile.isReadable()+'\n');
-
-    dump('Logshake: log input stream!');
-    let logInput = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
-    // 0x01 = PR_READONLY from https://mxr.mozilla.org/mozilla-central/source/nsprpub/pr/include/prio.h#588
-    // 0 is default (somehow)
-    // logInput.init(logFile, 0x01, 0666, 0);
-    logInput.init(logFile, 0x01, 0666, 0); // Ci.nsIFileInputStream.CLOSE_ON_EOF);
-    dump('Logshake: isNonBlocking? '+logInput.isNonBlocking()+'\n');
-
-    let logStream = Cc["@mozilla.org/binaryinputstream;1"].
-              createInstance(Ci.nsIBinaryInputStream);
-    logStream.setInputStream(logInput);
-
-    let  logArray; // = new Uint8Array(256*1024); //arbitrary
-    let  something = 0;
-    try {
-      logArray = logStream.readByteArray(1024);
-      dump("WOOOOO: "++'\n');
-    } catch(e) {
-      dump(e+'\n');
-      // DONE WITH THIS NONSENSE
-    }
-    // hexdump out the first 128 bytes
-    var lsString = "";
-    for(var i = 0; i < 128; i++) {
-      if(logArray[i] < 16) {
-        lsString += "0";
-      }
-      lsString += logArray[i].toString(16);
-    }
-
-    dump('Logshake something: '+something+'\n');
-    dump('Logshake stuff: '+lsString+'\n');
+    let logArray = shell.LogCapture.captureLog('main');
     var logBlob = new Blob([logArray],
                            {type: 'application/octet-binary'});
 
-
-    // omitting options parameter (charset and replacement character)
-    // The log is a binary file (despite being mostly text) and attempting to
-    // parse it as having a character set will explode
-    // let available = logStream.available();
-    // dump('Logshake: available '+available);
-
+    // Send the event to the requester
     shell.sendEvent(getContentWindow(), 'mozChromeEvent', {
       __exposedProps__: { type: 'r', log: 'r' },
       type: 'capture-log-success',
