@@ -137,7 +137,7 @@ this.libcutils = (function() {
 
       while(true) {
         let prop_info = c_property_find_nth(n);
-        if(!prop_info) { // break if null pointer
+        if(prop_info.isNull()) {
           break;
         }
         // read the prop_info into the key and value buffers
