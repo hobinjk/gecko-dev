@@ -1013,7 +1013,7 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
     // set of files which have log-type information
     let logLocations = ['/dev/log/main', '/dev/log/system', '/dev/log/radio',
                         '/dev/log/events', '/proc/kmsg', '/proc/meminfo', '/proc/version'];
-    logLocations.forEach(function(loc) {
+    logLocations.forEach(loc => {
       let logArray = shell.LogCapture.readLogFile(loc);
       let logBlob = new Blob([logArray],
                              {type: 'application/octet-binary'});
@@ -1033,8 +1033,7 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
     }
 
     // Send the event to the requester
-    shell.sendEvent(getContentWindow(), 'mozChromeEvent', {
-      __exposedProps__: { type: 'r', log: 'r' },
+    shell.sendChromeEvent({
       type: 'capture-logs-success',
       logs: logs
     });
