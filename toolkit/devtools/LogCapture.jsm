@@ -7,66 +7,55 @@
 this.EXPORTED_SYMBOLS = ['LogCapture'];
 
 /**
- * captureLog
+ * readLogFile
  * Read in /dev/log/{{log}} in nonblocking mode, which will return -1 if
  * reading would block the thread.
  *
  * @param log {String} The log from which to read. Must be present in /dev/log
  * @return {Uint8Array} Raw log data
  */
-function captureLog(log) {
-  // load in everything on demand
-  Components.utils.import('resource://gre/modules/ctypes.jsm');
+let readLogFile = function(logLocation) {
+  if(!this.ctypes) {
+    // load in everything on first use
+    Components.utils.import('resource://gre/modules/ctypes.jsm', this);
 
-  let lib = ctypes.open(ctypes.libraryName('c'));
+    this.lib = this.ctypes.open(this.ctypes.libraryName('c'));
 
-  let read = lib.declare('read',
-    ctypes.default_abi,
-    ctypes.int,       // bytes read (out)
-    ctypes.int,       // file descriptor (in)
-    ctypes.voidptr_t, // buffer to read into (in)
-    ctypes.size_t     // size_t size of buffer (in)
-  );
+    this.read = this.lib.declare('read',
+      this.ctypes.default_abi,
+      this.ctypes.int,       // bytes read (out)
+      this.ctypes.int,       // file descriptor (in)
+      this.ctypes.voidptr_t, // buffer to read into (in)
+      this.ctypes.size_t     // size_t size of buffer (in)
+    );
 
-  let open = lib.declare('open',
-    ctypes.default_abi,
-    ctypes.int,      // file descriptor (returned)
-    ctypes.char.ptr, // path
-    ctypes.int       // flags
-  );
+    this.open = this.lib.declare('open',
+      this.ctypes.default_abi,
+      this.ctypes.int,      // file descriptor (returned)
+      this.ctypes.char.ptr, // path
+      this.ctypes.int       // flags
+    );
 
-  let close = lib.declare('close',
-    ctypes.default_abi,
-    ctypes.int, // error code (returned)
-    ctypes.int  // file descriptor
-  );
+    this.close = this.lib.declare('close',
+      this.ctypes.default_abi,
+      this.ctypes.int, // error code (returned)
+      this.ctypes.int  // file descriptor
+    );
+  }
 
   const O_READONLY = 0;
   const O_NONBLOCK = 1 << 11;
 
-  const logWhitelist = ['main', 'system', 'events', 'radio'];
   const BUF_SIZE = 1024;
 
-  let okay = false;
-  for(let okayLog of logWhitelist) {
-    if(okayLog === log) {
-      okay = true;
-      break;
-    }
-  }
-
-  if(!okay) {
-    return;
-  }
-
-  let BufType = ctypes.ArrayType(ctypes.char);
+  let BufType = this.ctypes.ArrayType(this.ctypes.char);
   let buf = new BufType(BUF_SIZE);
   let logArray = [];
 
-  let logFd = open('/dev/log/'+log, O_READONLY | O_NONBLOCK);
+  let logFd = this.open(logLocation, O_READONLY | O_NONBLOCK);
 
   while(true) {
-    let count = read(logFd, buf, BUF_SIZE);
+    let count = this.read(logFd, buf, BUF_SIZE);
 
     if(count <= 0) {
       // log has return due to being nonblocking or running out of things
@@ -83,10 +72,16 @@ function captureLog(log) {
     logTypedArray[i] = logArray[i];
   }
 
-  close(logFd);
-  lib.close();
+  this.close(logFd);
 
   return logTypedArray;
-}
+};
 
-this.LogCapture = { captureLog: captureLog };
+let cleanup = function() {
+  this.lib.close();
+  this.read = this.open = this.close = null;
+  this.lib = null;
+  this.ctypes = null;
+};
+
+this.LogCapture = { readLogFile: readLogFile, cleanup: cleanup };

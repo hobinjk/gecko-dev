@@ -17,16 +17,16 @@ function run_test() {
     ok(log.length >= 0);
   }
 
-  let mainLog = LogCapture.captureLog('main');
+  let mainLog = LogCapture.readLogFile('main');
   verifyLog(mainLog);
 
-  let systemLog = LogCapture.captureLog('system');
+  let systemLog = LogCapture.readLogFile('system');
   verifyLog(systemLog);
 
-  let eventsLog = LogCapture.captureLog('events');
+  let eventsLog = LogCapture.readLogFile('events');
   verifyLog(eventsLog);
 
-  let radioLog = LogCapture.captureLog('radio');
+  let radioLog = LogCapture.readLogFile('radio');
   verifyLog(radioLog);
 }
 
