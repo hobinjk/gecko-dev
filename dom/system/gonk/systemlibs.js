@@ -32,8 +32,10 @@ let DEBUG;
  */
 this.libcutils = (function() {
   let lib;
+  let libc;
   try {
     lib = ctypes.open("libcutils.so");
+    libc = ctypes.open("libc.so");
   } catch(ex) {
     // Return a fallback option in case libcutils.so isn't present (e.g.
     // when building Firefox with MOZ_B2G_RIL.
@@ -81,10 +83,10 @@ this.libcutils = (function() {
   //      char value[PROP_VALUE_MAX];
   //};
 
-  let c_property_find_nth = lib.declare("__system_property_find_nth", ctypes.default_abi,
+  let c_property_find_nth = libc.declare("__system_property_find_nth", ctypes.default_abi,
                                    ctypes.voidptr_t,     // return value: nullable prop_info*
                                    ctypes.unsigned_int); // n: the index of the property to return
-  let c_property_read = lib.declare("__system_property_read", ctypes.default_abi,
+  let c_property_read = libc.declare("__system_property_read", ctypes.default_abi,
                                    ctypes.void_t,     // return: none
                                    ctypes.voidptr_t,  // non-null prop_info*
                                    ctypes.char.ptr,   // key
