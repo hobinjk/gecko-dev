@@ -6,8 +6,8 @@ const { LogCapture } = Cu.import('resources://gre/modules/devtools/LogCapture.js
 
 /**
  * Test that LogCapture successfully reads from the /dev/log devices, returning
- * a Uint8Array of some length, including zero. This tests the standard
- * /dev/log devices: main, system, events, and radio.
+ * a Uint8Array of some length, including zero. This tests a few standard
+ * log devices
  */
 function run_test() {
   function verifyLog(log) {
@@ -17,16 +17,13 @@ function run_test() {
     ok(log.length >= 0);
   }
 
-  let mainLog = LogCapture.readLogFile('main');
+  let mainLog = LogCapture.readLogFile('/dev/log/main');
   verifyLog(mainLog);
 
-  let systemLog = LogCapture.readLogFile('system');
+  let systemLog = LogCapture.readLogFile('/dev/log/system');
   verifyLog(systemLog);
 
-  let eventsLog = LogCapture.readLogFile('events');
-  verifyLog(eventsLog);
-
-  let radioLog = LogCapture.readLogFile('radio');
-  verifyLog(radioLog);
+  let meminfoLog = LogCapture.readLogFile('/proc/meminfo');
+  verifyLog(meminfoLog);
 }
 
