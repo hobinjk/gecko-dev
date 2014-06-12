@@ -77,12 +77,6 @@ this.libcutils = (function() {
   let c_key_buf = ctypes.char.array(SYSTEM_PROPERTY_KEY_MAX)();
   let c_value_buf = ctypes.char.array(SYSTEM_PROPERTY_VALUE_MAX)();
 
-  //struct prop_info {
-  //      char name[PROP_NAME_MAX];
-  //      unsigned volatile serial;
-  //      char value[PROP_VALUE_MAX];
-  //};
-
   let c_property_find_nth = libc.declare("__system_property_find_nth", ctypes.default_abi,
                                    ctypes.voidptr_t,     // return value: nullable prop_info*
                                    ctypes.unsigned_int); // n: the index of the property to return
