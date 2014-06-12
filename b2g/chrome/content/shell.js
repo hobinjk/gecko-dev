@@ -1012,25 +1012,15 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
 
     // set of files which have log-type information
     let logLocations = ['/dev/log/main', '/dev/log/system', '/dev/log/radio',
-                        '/dev/log/events', '/proc/kmsg', '/proc/meminfo', '/proc/version'];
+                        '/dev/log/events', '/proc/kmsg', '/proc/meminfo',
+                        '/proc/version', '/dev/__properties__'];
+
     logLocations.forEach(loc => {
       let logArray = shell.LogCapture.readLogFile(loc);
       let logBlob = new Blob([logArray],
                              {type: 'application/octet-binary'});
       logs[loc] = logBlob;
     });
-
-
-    if(libcutils) {
-      let properties = libcutils.property_get_all();
-      // generate a string of property: property_value\n from the properties
-      let propertiesString = '';
-      for(let key in properties) {
-        propertiesString += key+': '+properties[key]+'\n';
-      }
-
-      logs['getprop'] = new Blob([propertiesString], {type: 'application/octet-binary'});
-    }
 
     // Send the event to the requester
     shell.sendChromeEvent({

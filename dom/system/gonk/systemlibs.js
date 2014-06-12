@@ -32,10 +32,8 @@ let DEBUG;
  */
 this.libcutils = (function() {
   let lib;
-  let libc;
   try {
     lib = ctypes.open("libcutils.so");
-    libc = ctypes.open("libc.so");
   } catch(ex) {
     // Return a fallback option in case libcutils.so isn't present (e.g.
     // when building Firefox with MOZ_B2G_RIL.
@@ -52,15 +50,6 @@ this.libcutils = (function() {
       },
       property_set: function(key, value) {
         fake_propdb[key] = value;
-      },
-      property_get_all: function() {
-        // return a clone instead of the real fake db because the real db is a
-        // clone too
-        let cloned_db = {};
-        for(let key in fake_propdb) {
-          cloned_db[key] = fake_propdb[key];
-        }
-        return cloned_db;
       }
     };
   }
@@ -74,20 +63,7 @@ this.libcutils = (function() {
                                    ctypes.int,       // return value: success
                                    ctypes.char.ptr,  // key
                                    ctypes.char.ptr); // value
-  let c_key_buf = ctypes.char.array(SYSTEM_PROPERTY_KEY_MAX)();
   let c_value_buf = ctypes.char.array(SYSTEM_PROPERTY_VALUE_MAX)();
-
-  let c_property_find_nth = libc.declare("__system_property_find_nth", ctypes.default_abi,
-                                   ctypes.voidptr_t,     // return value: nullable prop_info*
-                                   ctypes.unsigned_int); // n: the index of the property to return
-  let c_property_read = libc.declare("__system_property_read", ctypes.default_abi,
-                                   ctypes.void_t,     // return: none
-                                   ctypes.voidptr_t,  // non-null prop_info*
-                                   ctypes.char.ptr,   // key
-                                   ctypes.char.ptr);  // value
-
-
-
   return {
 
     /**
@@ -120,34 +96,7 @@ this.libcutils = (function() {
         throw Error('libcutils.property_set("' + key + '", "' + value +
                     '") failed with error ' + rv);
       }
-    },
-
-    /**
-     * Get all system properties as a dict with keys mapping to values
-     */
-    property_get_all: function() {
-      let n = 0;
-      let propertyDict = {};
-
-      while(true) {
-        let prop_info = c_property_find_nth(n);
-        if(prop_info.isNull()) {
-          break;
-        }
-        // read the prop_info into the key and value buffers
-        c_property_read(prop_info, c_key_buf, c_value_buf);
-        let key = c_key_buf.readString();
-        let value = c_value_buf.readString();
-
-        propertyDict[key] = value;
-
-        n++;
-      }
-
-      return propertyDict;
     }
-
-
 
   };
 })();
