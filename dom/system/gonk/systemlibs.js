@@ -64,6 +64,7 @@ this.libcutils = (function() {
                                    ctypes.char.ptr,  // key
                                    ctypes.char.ptr); // value
   let c_value_buf = ctypes.char.array(SYSTEM_PROPERTY_VALUE_MAX)();
+
   return {
 
     /**
