@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+/* jshint esnext: true */
 
 'use strict';
 
@@ -15,7 +16,7 @@ this.EXPORTED_SYMBOLS = ['LogCapture'];
  * @return {Uint8Array} Raw log data
  */
 let readLogFile = function(logLocation) {
-  if(!this.ctypes) {
+  if (!this.ctypes) {
     // load in everything on first use
     Components.utils.import('resource://gre/modules/ctypes.jsm', this);
 
@@ -54,21 +55,21 @@ let readLogFile = function(logLocation) {
 
   let logFd = this.open(logLocation, O_READONLY | O_NONBLOCK);
 
-  while(true) {
+  while (true) {
     let count = this.read(logFd, buf, BUF_SIZE);
 
-    if(count <= 0) {
+    if (count <= 0) {
       // log has return due to being nonblocking or running out of things
       break;
     }
 
-    for(let i = 0; i < count; i++) {
+    for (let i = 0; i < count; i++) {
       logArray.push(buf[i]);
     }
   }
 
   let logTypedArray = new Uint8Array(logArray.length);
-  for(let i = 0; i < logArray.length; i++) {
+  for (let i = 0; i < logArray.length; i++) {
     logTypedArray[i] = logArray[i];
   }
 
