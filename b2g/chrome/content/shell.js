@@ -1008,6 +1008,8 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
       return;
     }
 
+    dump('Logshake: received event\n');
+
     let logs = {};
 
     // set of files which have log-type information
@@ -1015,13 +1017,16 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
                         '/dev/log/events', '/proc/kmsg', '/proc/meminfo',
                         '/proc/version', '/dev/__properties__'];
 
+    dump('Logshake: saving logs\n');
     logLocations.forEach(loc => {
       let logArray = shell.LogCapture.readLogFile(loc);
       let logBlob = new Blob([logArray],
                              {type: 'application/octet-binary'});
       logs[loc] = logBlob;
+      dump('Logshake: saved '+loc+'\n');
     });
 
+    dump('Logshake: finished saving logs, replying with '+logs.toSource()+'\n');
     // Send the event to the requester
     shell.sendChromeEvent({
       type: 'capture-logs-success',
