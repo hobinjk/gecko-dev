@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 /* jshint esnext: true */
+/* global Uint8Array, Components */
 
 'use strict';
 
@@ -54,6 +55,9 @@ let readLogFile = function(logLocation) {
   let logArray = [];
 
   let logFd = this.open(logLocation, O_READONLY | O_NONBLOCK);
+  if (logFd === -1) {
+    return null;
+  }
 
   while (true) {
     let count = this.read(logFd, buf, BUF_SIZE);
