@@ -113,6 +113,12 @@ var shell = {
     return this.LogCapture;
   },
 
+  get LogParser() {
+    delete this.LogParser;
+    Cu.import("resource://gre/modules/LogParser.jsm", this);
+    return this.LogParser;
+  },
+
   onlineForCrashReport: function shell_onlineForCrashReport() {
     let wifiManager = navigator.mozWifiManager;
     let onWifi = (wifiManager &&
@@ -1008,8 +1014,6 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
       return;
     }
 
-    dump('Logshake: received event\n');
-
     let logs = {};
 
     // set of files which have log-type information
@@ -1017,16 +1021,22 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
                         '/dev/log/events', '/proc/kmsg', '/proc/meminfo',
                         '/proc/version', '/dev/__properties__'];
 
-    dump('Logshake: saving logs\n');
     logLocations.forEach(loc => {
       let logArray = shell.LogCapture.readLogFile(loc);
+      if (!logArray) {
+        return;
+      }
+      if (loc.startsWith('/dev/log/')) {
+        logArray = shell.LogParser.prettyPrintLogArrayBuffer(logArray);
+      } else if (loc === '/dev/__properties__') {
+        logArray = shell.LogParser.prettyPrintPropertiesArrayBuffer(logArray);
+      }
+
       let logBlob = new Blob([logArray],
-                             {type: 'application/octet-binary'});
+                             {type: 'text/plain'});
       logs[loc] = logBlob;
-      dump('Logshake: saved '+loc+'\n');
     });
 
-    dump('Logshake: finished saving logs, replying with '+logs.toSource()+'\n');
     // Send the event to the requester
     shell.sendChromeEvent({
       type: 'capture-logs-success',
