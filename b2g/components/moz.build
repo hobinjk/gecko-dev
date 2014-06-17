@@ -48,6 +48,8 @@ EXTRA_JS_MODULES += [
     'AppFrames.jsm',
     'ContentRequestHelper.jsm',
     'ErrorPage.jsm',
+    'LogCapture.jsm',
+    'LogParser.jsm',
     'SignInToWebsite.jsm',
     'SystemAppProxy.jsm',
     'TelURIParser.jsm',

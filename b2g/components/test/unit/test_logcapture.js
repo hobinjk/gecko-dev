@@ -1,7 +1,6 @@
 /* Any copyright is dedicated to the Public Domain.
    http://creativecommons.org/publicdomain/zero/1.0/ */
 
-const { notEqual, ok } = Cu.import('resource://testing-common/Assert.jsm');
 const { LogCapture } = Cu.import('resources://gre/modules/devtools/LogCapture.jsm');
 
 /**

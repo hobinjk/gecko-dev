@@ -109,7 +109,7 @@ var shell = {
 
   get LogCapture() {
     delete this.LogCapture;
-    Cu.import("resource://gre/modules/devtools/LogCapture.jsm", this);
+    Cu.import("resource://gre/modules/LogCapture.jsm", this);
     return this.LogCapture;
   },
 
@@ -1027,9 +1027,9 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
         return;
       }
       if (loc.startsWith('/dev/log/')) {
-        logArray = shell.LogParser.prettyPrintLogArrayBuffer(logArray);
+        logArray = shell.LogParser.prettyPrintLogArrayBuffer(logArray.buffer);
       } else if (loc === '/dev/__properties__') {
-        logArray = shell.LogParser.prettyPrintPropertiesArrayBuffer(logArray);
+        logArray = shell.LogParser.prettyPrintPropertiesArrayBuffer(logArray.buffer);
       }
 
       let logBlob = new Blob([logArray],

@@ -129,8 +129,8 @@ function formatLogMessage(logMessage) {
   //          timeBuf, entry->tv_nsec / 1000000,
   //          entry->pid, entry->tid, priChar, entry->tag);
   return getTimeString(logMessage.time) +
-         ' ' + padLeft(logMessage.processId, 5) +
-         ' ' + padLeft(logMessage.processId, 5) +
+         ' ' + padLeft(''+logMessage.processId, 5) +
+         ' ' + padLeft(''+logMessage.threadId, 5) +
          ' ' + getPriorityString(logMessage.priority) +
          ' ' + padRight(logMessage.tag) +
          ': ' + logMessage.message;
