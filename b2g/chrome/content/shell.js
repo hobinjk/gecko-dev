@@ -1048,7 +1048,7 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
     }
 
     // Send the event to the requester
-    SystemAppProxy.sendCustomEvent('mozChromeEvent', {
+    SystemAppProxy._sendCustomEvent('mozChromeEvent', {
       type: 'capture-logs-success',
       logs: logs
     });
