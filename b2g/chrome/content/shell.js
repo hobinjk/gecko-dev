@@ -1021,14 +1021,18 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
 
     // set of files which have log-type information
     let logsWithParsers = {
+      '/dev/__properties__': shell.LogParser.prettyPrintPropertiesArray,
       '/dev/log/main': shell.LogParser.prettyPrintLogArray,
       '/dev/log/system': shell.LogParser.prettyPrintLogArray,
       '/dev/log/radio': shell.LogParser.prettyPrintLogArray,
       '/dev/log/events': shell.LogParser.prettyPrintLogArray,
+      '/proc/cmdline': shell.LogParser.prettyPrintArray,
       '/proc/kmsg': shell.LogParser.prettyPrintArray,
       '/proc/meminfo': shell.LogParser.prettyPrintArray,
+      '/proc/uptime': shell.LogParser.prettyPrintArray,
       '/proc/version': shell.LogParser.prettyPrintArray,
-      '/dev/__properties__': shell.LogParser.prettyPrintPropertiesArray
+      '/proc/vmallocinfo': shell.LogParser.prettyPrintArray,
+      '/proc/vmstat': shell.LogParser.prettyPrintArray
     };
 
     for(let loc in logsWithParsers) {
@@ -1044,7 +1048,7 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
     }
 
     // Send the event to the requester
-    shell.sendChromeEvent({
+    SystemAppProxy.sendCustomEvent('mozChromeEvent', {
       type: 'capture-logs-success',
       logs: logs
     });
