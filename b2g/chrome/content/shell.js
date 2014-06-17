@@ -107,6 +107,7 @@ var shell = {
 #endif
   },
 
+#ifdef MOZ_WIDGET_GONK
   get LogCapture() {
     delete this.LogCapture;
     Cu.import("resource://gre/modules/LogCapture.jsm", this);
@@ -118,6 +119,7 @@ var shell = {
     Cu.import("resource://gre/modules/LogParser.jsm", this);
     return this.LogParser;
   },
+#endif
 
   onlineForCrashReport: function shell_onlineForCrashReport() {
     let wifiManager = navigator.mozWifiManager;
@@ -1003,6 +1005,7 @@ window.addEventListener('ContentStart', function ss_onContentStart() {
   });
 });
 
+#ifdef MOZ_WIDGET_GONK
 // Listen for log requests sent by Gaia. This follows the screenshot model,
 // using a mozContentEvent with detail.type set to 'capture-logs'. The logs are
 // then returned using a mozChromeEvent with detail.type 'capture-logs-success'
@@ -1017,25 +1020,28 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
     let logs = {};
 
     // set of files which have log-type information
-    let logLocations = ['/dev/log/main', '/dev/log/system', '/dev/log/radio',
-                        '/dev/log/events', '/proc/kmsg', '/proc/meminfo',
-                        '/proc/version', '/dev/__properties__'];
+    let logsWithParsers = {
+      '/dev/log/main': shell.LogParser.prettyPrintLogArray,
+      '/dev/log/system': shell.LogParser.prettyPrintLogArray,
+      '/dev/log/radio': shell.LogParser.prettyPrintLogArray,
+      '/dev/log/events': shell.LogParser.prettyPrintLogArray,
+      '/proc/kmsg': shell.LogParser.prettyPrintArray,
+      '/proc/meminfo': shell.LogParser.prettyPrintArray,
+      '/proc/version': shell.LogParser.prettyPrintArray,
+      '/dev/__properties__': shell.LogParser.prettyPrintPropertiesArray
+    };
 
-    logLocations.forEach(loc => {
+    for(let loc in logsWithParsers) {
       let logArray = shell.LogCapture.readLogFile(loc);
       if (!logArray) {
         return;
       }
-      if (loc.startsWith('/dev/log/')) {
-        logArray = shell.LogParser.prettyPrintLogArrayBuffer(logArray.buffer);
-      } else if (loc === '/dev/__properties__') {
-        logArray = shell.LogParser.prettyPrintPropertiesArrayBuffer(logArray.buffer);
-      }
+      let prettyLogArray = logsWithParsers[loc](logArray);
 
-      let logBlob = new Blob([logArray],
+      let logBlob = new Blob([prettyLogArray],
                              {type: 'text/plain'});
       logs[loc] = logBlob;
-    });
+    }
 
     // Send the event to the requester
     shell.sendChromeEvent({
@@ -1044,6 +1050,7 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
     });
   });
 });
+#endif
 
 (function contentCrashTracker() {
   Services.obs.addObserver(function(aSubject, aTopic, aData) {
