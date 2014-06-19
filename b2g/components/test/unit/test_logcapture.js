@@ -1,7 +1,6 @@
 /* Any copyright is dedicated to the Public Domain.
    http://creativecommons.org/publicdomain/zero/1.0/ */
 
-const { LogCapture } = Cu.import('resources://gre/modules/devtools/LogCapture.jsm');
 
 /**
  * Test that LogCapture successfully reads from the /dev/log devices, returning
@@ -9,6 +8,8 @@ const { LogCapture } = Cu.import('resources://gre/modules/devtools/LogCapture.js
  * log devices
  */
 function run_test() {
+  Components.utils.import('resource:///modules/LogCapture.jsm');
+
   function verifyLog(log) {
     // log exists
     notEqual(log, null);
