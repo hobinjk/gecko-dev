@@ -1019,6 +1019,10 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
 
     let logs = {};
 
+
+    let debug = msg => dump('Logshake: '+msg+'\n');
+    debug('capture start');
+
     // set of files which have log-type information
     let logsWithParsers = {
       '/dev/__properties__': shell.LogParser.prettyPrintPropertiesArray,
@@ -1047,6 +1051,8 @@ window.addEventListener('ContentStart', function captureLogs_onContentStart() {
       logs[loc] = logBlob;
     }
 
+    debug('capture end');
+    debug('sending event');
     // Send the event to the requester
     SystemAppProxy._sendCustomEvent('mozChromeEvent', {
       type: 'capture-logs-success',

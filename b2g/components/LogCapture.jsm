@@ -1,8 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-/* jshint esnext: true */
-/* global Uint8Array, Components */
+/* jshint moz: true */
+/* global Uint8Array, Components, dump */
 
 'use strict';
 
@@ -17,6 +17,9 @@ this.EXPORTED_SYMBOLS = ['LogCapture'];
  * @return {Uint8Array} Raw log data
  */
 let readLogFile = function(logLocation) {
+  let debug = msg => dump('LogCapture: '+msg+'\n');
+
+  debug('start read of '+logLocation);
   if (!this.ctypes) {
     // load in everything on first use
     Components.utils.import('resource://gre/modules/ctypes.jsm', this);
@@ -48,7 +51,7 @@ let readLogFile = function(logLocation) {
   const O_READONLY = 0;
   const O_NONBLOCK = 1 << 11;
 
-  const BUF_SIZE = 1024;
+  const BUF_SIZE = 2048;
 
   let BufType = this.ctypes.ArrayType(this.ctypes.char);
   let buf = new BufType(BUF_SIZE);
@@ -59,23 +62,28 @@ let readLogFile = function(logLocation) {
     return null;
   }
 
+  debug('everything initialized for '+logLocation);
+
+  let readStart = Date.now();
+  let readCount = 0;
   while (true) {
     let count = this.read(logFd, buf, BUF_SIZE);
+    readCount += 1;
 
     if (count <= 0) {
       // log has return due to being nonblocking or running out of things
       break;
     }
-
-    for (let i = 0; i < count; i++) {
+    for(let i = 0; i < count; i++) {
       logArray.push(buf[i]);
     }
   }
 
-  let logTypedArray = new Uint8Array(logArray.length);
-  for (let i = 0; i < logArray.length; i++) {
-    logTypedArray[i] = logArray[i];
-  }
+  debug('done reading, required ' + readCount + ' reads taking '+(Date.now() - readStart)+' ms');
+
+  let logTypedArray = new Uint8Array(logArray);
+
+  debug('done copying to typed array');
 
   this.close(logFd);
 
