@@ -1,12 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
+/* jshint moz: true */
+/* global dump, Components, IndexedDBHelper, Services, IDBKeyRange */
 
 "use strict";
 
 this.EXPORTED_SYMBOLS = ['NetworkStatsDB'];
 
-const DEBUG = false;
+const DEBUG = true;
 function debug(s) { dump("-*- NetworkStatsDB: " + s + "\n"); }
 
 const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components;
@@ -761,6 +763,7 @@ NetworkStatsDB.prototype = {
       let request = aStore.openCursor(range).onsuccess = function(event) {
         var cursor = event.target.result;
         if (cursor){
+          debug('Cursor value: ' + cursor.value.toSource());
           data.push({ rxBytes: cursor.value.rxBytes,
                       txBytes: cursor.value.txBytes,
                       date: new Date(cursor.value.timestamp + offset) });
