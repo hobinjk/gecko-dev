@@ -4,7 +4,7 @@
 
 "use strict";
 
-const DEBUG = false;
+const DEBUG = true;
 function debug(s) {
   if (DEBUG) {
     dump("-*- NetworkStatsService: " + s + "\n");
@@ -405,7 +405,7 @@ this.NetworkStatsService = {
     let network = msg.network;
     let netId = this.getNetworkId(network.id, network.type);
 
-    let appId = 0;
+    let appId = null;
     let appManifestURL = msg.appManifestURL;
     if (appManifestURL) {
       appId = appsService.getAppLocalIdByManifestURL(appManifestURL);

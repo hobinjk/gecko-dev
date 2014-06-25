@@ -31,6 +31,7 @@ const nsIClassInfo         = Ci.nsIClassInfo;
 const NETWORKSTATSDATA_CID = Components.ID("{3b16fe17-5583-483a-b486-b64a3243221c}");
 
 function NetworkStatsData(aWindow, aData) {
+  this.appManifestURL = aData.appManifestURL;
   this.rxBytes = aData.rxBytes;
   this.txBytes = aData.txBytes;
   this.date = new aWindow.Date(aData.date.getTime());

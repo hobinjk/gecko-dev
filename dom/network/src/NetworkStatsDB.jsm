@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 /* jshint moz: true */
-/* global dump, Components, IndexedDBHelper, Services, IDBKeyRange */
+/* global dump, Components, IndexedDBHelper, IDBKeyRange */
 
 "use strict";
 
@@ -16,6 +16,7 @@ const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components;
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/IndexedDBHelper.jsm");
 Cu.importGlobalProperties(["indexedDB"]);
+
 
 const DB_NAME = "net_stats";
 const DB_VERSION = 8;
@@ -750,8 +751,8 @@ NetworkStatsDB.prototype = {
 
     this.dbNewTxn(STATS_STORE_NAME, "readonly", function(aTxn, aStore) {
       let network = [aNetwork.id, aNetwork.type];
-      let lowerFilter = [aAppId, aServiceType, network, start];
-      let upperFilter = [aAppId, aServiceType, network, end];
+      let lowerFilter = [aAppId || 0, aServiceType, network, start];
+      let upperFilter = [aAppId || Number.MAX_VALUE, aServiceType, network, end];
       let range = IDBKeyRange.bound(lowerFilter, upperFilter, false, false);
 
       let data = [];
@@ -760,11 +761,16 @@ NetworkStatsDB.prototype = {
         aTxn.result = {};
       }
 
+      let AppsService = Cc['@mozilla.org/AppsService;1'].getService(Ci.nsIAppsService);
+
       let request = aStore.openCursor(range).onsuccess = function(event) {
         var cursor = event.target.result;
         if (cursor){
-          debug('Cursor value: ' + cursor.value.toSource());
-          data.push({ rxBytes: cursor.value.rxBytes,
+
+          let app = AppsService.getAppByLocalId(cursor.value.appId) || {manifestURL: ""};
+
+          data.push({ appManifestURL: app.manifestURL,
+                      rxBytes: cursor.value.rxBytes,
                       txBytes: cursor.value.txBytes,
                       date: new Date(cursor.value.timestamp + offset) });
           cursor.continue();
@@ -791,19 +797,22 @@ NetworkStatsDB.prototype = {
    */
   fillResultSamples: function fillResultSamples(aStart, aEnd, aData) {
     if (aData.length == 0) {
-      aData.push({ rxBytes: undefined,
-                  txBytes: undefined,
-                  date: new Date(aStart) });
+      aData.push({ appManifestURL: undefined,
+                   rxBytes: undefined,
+                   txBytes: undefined,
+                   date: new Date(aStart) });
     }
 
     while (aStart < aData[0].date.getTime()) {
-      aData.unshift({ rxBytes: undefined,
+      aData.unshift({ appManifestURL: undefined,
+                      rxBytes: undefined,
                       txBytes: undefined,
                       date: new Date(aData[0].date.getTime() - SAMPLE_RATE) });
     }
 
     while (aEnd > aData[aData.length - 1].date.getTime()) {
-      aData.push({ rxBytes: undefined,
+      aData.push({ appManifestURL: undefined,
+                   rxBytes: undefined,
                    txBytes: undefined,
                    date: new Date(aData[aData.length - 1].date.getTime() + SAMPLE_RATE) });
     }

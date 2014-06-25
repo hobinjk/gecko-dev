@@ -7,7 +7,8 @@
  Pref="dom.mozNetworkStats.enabled",
  Func="Navigator::HasNetworkStatsSupport"]
 interface MozNetworkStatsData {
-  readonly attribute unsigned long   rxBytes;   // Received bytes.
-  readonly attribute unsigned long   txBytes;   // Sent bytes.
-  readonly attribute Date            date;      // Date.
+  readonly attribute unsigned long   rxBytes;        // Received bytes.
+  readonly attribute unsigned long   txBytes;        // Sent bytes.
+  readonly attribute DOMString       appManifestURL; // Originating application manifest URL or ""
+  readonly attribute Date            date;           // Date.
 };
