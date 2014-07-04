@@ -50,6 +50,7 @@ EXTRA_JS_MODULES += [
     'ErrorPage.jsm',
     'LogCapture.jsm',
     'LogParser.jsm',
+    'LogShake.jsm',
     'SignInToWebsite.jsm',
     'SystemAppProxy.jsm',
     'TelURIParser.jsm',

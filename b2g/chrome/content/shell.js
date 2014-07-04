@@ -108,16 +108,10 @@ var shell = {
   },
 
 #ifdef MOZ_WIDGET_GONK
-  get LogCapture() {
-    delete this.LogCapture;
-    Cu.import("resource://gre/modules/LogCapture.jsm", this);
-    return this.LogCapture;
-  },
-
-  get LogParser() {
-    delete this.LogParser;
-    Cu.import("resource://gre/modules/LogParser.jsm", this);
-    return this.LogParser;
+  get LogShake() {
+    delete this.LogShake;
+    Cu.import("resource://gre/modules/LogShake.jsm", this);
+    return this.LogShake;
   },
 #endif
 
@@ -1006,57 +1000,23 @@ window.addEventListener('ContentStart', function ss_onContentStart() {
 });
 
 #ifdef MOZ_WIDGET_GONK
-// Listen for log requests sent by Gaia. This follows the screenshot model,
-// using a mozContentEvent with detail.type set to 'capture-logs'. The logs are
-// then returned using a mozChromeEvent with detail.type 'capture-logs-success'
-// and the logs attached to detail.logs as a mapping of log location to Blob
+// Listen for log requests sent by Gaia. In response to a 'capture-logs' event it will
+// save log files to an arbitrary directory which it will then return on a
+// 'capture-logs-success' event with detail.logFilenames representing each log
+// file's filename in the directory
 window.addEventListener('ContentStart', function captureLogs_onContentStart() {
   let content = shell.contentBrowser.contentWindow;
-  content.addEventListener('mozContentEvent', function captureLogs_onMozContentEvent(e) {
-    if (e.detail.type !== 'capture-logs') {
-      return;
-    }
-
-    let logs = {};
-
-
-    let debug = msg => dump('Logshake: '+msg+'\n');
-    debug('capture start');
-
-    // set of files which have log-type information
-    let logsWithParsers = {
-      '/dev/__properties__': shell.LogParser.prettyPrintPropertiesArray,
-      '/dev/log/main': shell.LogParser.prettyPrintLogArray,
-      '/dev/log/system': shell.LogParser.prettyPrintLogArray,
-      '/dev/log/radio': shell.LogParser.prettyPrintLogArray,
-      '/dev/log/events': shell.LogParser.prettyPrintLogArray,
-      '/proc/cmdline': shell.LogParser.prettyPrintArray,
-      '/proc/kmsg': shell.LogParser.prettyPrintArray,
-      '/proc/meminfo': shell.LogParser.prettyPrintArray,
-      '/proc/uptime': shell.LogParser.prettyPrintArray,
-      '/proc/version': shell.LogParser.prettyPrintArray,
-      '/proc/vmallocinfo': shell.LogParser.prettyPrintArray,
-      '/proc/vmstat': shell.LogParser.prettyPrintArray
-    };
-
-    for(let loc in logsWithParsers) {
-      let logArray = shell.LogCapture.readLogFile(loc);
-      if (!logArray) {
-        return;
-      }
-      let prettyLogArray = logsWithParsers[loc](logArray);
-
-      let logBlob = new Blob([prettyLogArray],
-                             {type: 'text/plain'});
-      logs[loc] = logBlob;
-    }
-
-    debug('capture end');
-    debug('sending event');
-    // Send the event to the requester
-    SystemAppProxy._sendCustomEvent('mozChromeEvent', {
-      type: 'capture-logs-success',
-      logs: logs
+  content.addEventListener('capture-logs', function captureLogs_onCaptureLogsEvent(e) {
+    shell.LogShake.captureLogs().then(function(logFilenames) {
+      dump('Logshake: Done?!?!?!?!?!?');
+      // On resolution send the success event to the requester
+      SystemAppProxy._sendCustomEvent('capture-logs-success', {
+        logFilenames: logFilenames
+      });
+    }, function(error) {
+      dump('Logshake error: '+error);
+      // On an error send the error event
+      SystemAppProxy._sendCustomEvent('capture-logs-error', {error: error});
     });
   });
 });
