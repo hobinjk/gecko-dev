@@ -17,9 +17,6 @@ this.EXPORTED_SYMBOLS = ['LogCapture'];
  * @return {Uint8Array} Raw log data
  */
 let readLogFile = function(logLocation) {
-  let debug = msg => dump('LogCapture: '+msg+'\n');
-
-  debug('start read of '+logLocation);
   if (!this.ctypes) {
     // load in everything on first use
     Components.utils.import('resource://gre/modules/ctypes.jsm', this);
@@ -62,8 +59,6 @@ let readLogFile = function(logLocation) {
     return null;
   }
 
-  debug('everything initialized for '+logLocation);
-
   let readStart = Date.now();
   let readCount = 0;
   while (true) {
@@ -79,11 +74,7 @@ let readLogFile = function(logLocation) {
     }
   }
 
-  debug('done reading, required ' + readCount + ' reads taking '+(Date.now() - readStart)+' ms');
-
   let logTypedArray = new Uint8Array(logArray);
-
-  debug('done copying to typed array');
 
   this.close(logFd);
 
