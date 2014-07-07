@@ -19,7 +19,7 @@ XPCOMUtils.defineLazyServiceGetter(this, "volumeService",
 this.EXPORTED_SYMBOLS = ['LogShake'];
 
 function debug(msg) {
-  dump('LogShake.jsm: '+msg);
+  // dump('LogShake.jsm: '+msg);
 }
 
 function getLogFilename(logLocation) {
