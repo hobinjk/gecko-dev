@@ -962,7 +962,8 @@ window.addEventListener('ContentStart', function ss_onContentStart() {
       var width = docRect.width;
       var height = docRect.height;
 
-      // Convert scale from CSS pixels (potentially fractional) to device pixels (integer)
+      // Convert width and height from CSS pixels (potentially fractional)
+      // to device pixels (integer)
       var scale = window.devicePixelRatio;
       canvas.setAttribute('width', Math.round(width * scale));
       canvas.setAttribute('height', Math.round(height * scale));
