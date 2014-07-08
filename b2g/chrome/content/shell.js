@@ -956,10 +956,6 @@ window.addEventListener('ContentStart', function ss_onContentStart() {
       return;
 
     try {
-      var debug = function(msg) {
-        dump('Screenshot: '+msg);
-      };
-
       var canvas = document.createElementNS('http://www.w3.org/1999/xhtml',
                                             'canvas');
       var docRect = document.body.getBoundingClientRect();
@@ -970,8 +966,6 @@ window.addEventListener('ContentStart', function ss_onContentStart() {
       var scale = window.devicePixelRatio;
       canvas.setAttribute('width', Math.round(width * scale));
       canvas.setAttribute('height', Math.round(height * scale));
-      debug('cw: '+canvas.width);
-      debug('ch: '+canvas.height);
 
       var context = canvas.getContext('2d');
       var flags =
