@@ -956,10 +956,14 @@ window.addEventListener('ContentStart', function ss_onContentStart() {
       return;
 
     try {
+      var debug = function(msg) {
+        dump('Screenshot: '+msg);
+      };
       var canvas = document.createElementNS('http://www.w3.org/1999/xhtml',
                                             'canvas');
       var width = window.innerWidth;
-      var height = window.innerHeight;
+      var height = window.innerHeight + 1;
+      debug('diiii w: '+width+', h: '+height);
       var scale = window.devicePixelRatio;
       canvas.setAttribute('width', width * scale);
       canvas.setAttribute('height', height * scale);
