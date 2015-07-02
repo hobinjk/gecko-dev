@@ -210,6 +210,13 @@ status_t GonkBufferQueue::setBufferCount(int bufferCount) {
     return NO_ERROR;
 }
 
+status_t GonkBufferQueue::setBuffersSize(int size) {
+    // There's like a 50% chance this explodes if used
+    Mutex::Autolock lock(mMutex);
+    mGraphicBufferAlloc->setGraphicBufferSize(size);
+    return NO_ERROR;
+}
+
 int GonkBufferQueue::query(int what, int* outValue)
 {
     ATRACE_CALL();
