@@ -70,6 +70,7 @@ GonkNativeWindowClient::GonkNativeWindowClient(
     mConnectedToCpu = false;
     mProducerControlledByApp = controlledByApp;
     mSwapIntervalZero = false;
+    mSwitchStatus = false;
 }
 
 GonkNativeWindowClient::~GonkNativeWindowClient() {
@@ -277,7 +278,7 @@ int GonkNativeWindowClient::queueBuffer(android_native_buffer_t* buffer, int fen
     sp<Fence> fence(fenceFd >= 0 ? new Fence(fenceFd) : Fence::NO_FENCE);
     IGraphicBufferProducer::QueueBufferOutput output;
     IGraphicBufferProducer::QueueBufferInput input(timestamp, isAutoTimestamp,
-            crop, mScalingMode, mTransform, mSwapIntervalZero, fence);
+            crop, mScalingMode, mTransform, mSwapIntervalZero, mSwitchStatus, fence);
     status_t err = mGraphicBufferProducer->queueBuffer(i, input, &output);
     if (err != OK)  {
         ALOGE("queueBuffer: error queuing buffer to SurfaceTexture, %d", err);

@@ -59,13 +59,14 @@ void MediaOmxCommonReader::CheckAudioOffload()
   // Not much benefit in trying to offload other channel types. Most of them
   // aren't supported and also duration would be less than a minute
   bool isTypeMusic = mAudioChannel == dom::AudioChannel::Content;
+  sp<MetaData> vMeta; // Unused video metadata
 
   DECODER_LOG(LogLevel::Debug, ("%s meta %p, no video %d, no streaming %d,"
       " channel type %d", __FUNCTION__, meta.get(), hasNoVideo,
       isNotStreaming, mAudioChannel));
 
   if ((meta.get()) && hasNoVideo && isNotStreaming && isTypeMusic &&
-      canOffloadStream(meta, false, false, AUDIO_STREAM_MUSIC)) {
+      canOffloadStream(meta, false, vMeta, false, AUDIO_STREAM_MUSIC)) {
     DECODER_LOG(LogLevel::Debug, ("Can offload this audio stream"));
     mDecoder->SetPlatformCanOffloadAudio(true);
   }

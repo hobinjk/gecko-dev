@@ -513,10 +513,11 @@ status_t GonkBufferQueue::queueBuffer(int buf,
     int64_t timestamp;
     bool isAutoTimestamp;
     bool async;
+    bool switchStatus;
     sp<Fence> fence;
 
     input.deflate(&timestamp, &isAutoTimestamp, &crop, &scalingMode, &transform,
-             &async, &fence);
+             &async, &switchStatus, &fence);
 
     if (fence == NULL) {
         ALOGE("queueBuffer: fence is NULL");

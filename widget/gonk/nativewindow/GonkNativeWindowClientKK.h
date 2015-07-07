@@ -241,6 +241,9 @@ private:
     // achieve an asynchronous swap interval
     bool mSwapIntervalZero;
 
+    // Probably unimportant
+    bool mSwitchStatus;
+
     // mConsumerRunningBehind whether the consumer is running more than
     // one buffer behind the producer.
     mutable bool mConsumerRunningBehind;

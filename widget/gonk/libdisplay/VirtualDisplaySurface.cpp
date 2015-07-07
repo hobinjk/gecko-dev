@@ -467,8 +467,9 @@ status_t VirtualDisplaySurface::queueBuffer(int pslot,
         int scalingMode;
         uint32_t transform;
         bool async;
+        bool switchStatus;
         input.deflate(&timestamp, &isAutoTimestamp, &crop, &scalingMode,
-                &transform, &async, &mFbFence);
+                &transform, &async, &switchStatus, &mFbFence);
 
         mFbProducerSlot = pslot;
         mOutputFence = mFbFence;
