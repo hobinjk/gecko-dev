@@ -1273,7 +1273,7 @@ BluetoothGattClientHALInterface::SetAdvData(
   BluetoothGattClientResultHandler* aRes)
 {
   bt_status_t status;
-#if ANDROID_VERSION >= 21
+#if ANDROID_VERSION >= 21 || true
   status = mInterface->set_adv_data(
     aServerIf, aIsScanRsp, aIsNameIncluded, aIsTxPowerIncluded,
     aMinInterval, aMaxInterval, aApperance,

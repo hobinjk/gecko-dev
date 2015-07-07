@@ -168,7 +168,11 @@ BluetoothA2dpHALInterface::Connect(const nsAString& aBdAddr,
   bt_bdaddr_t bdAddr;
 
   if (NS_SUCCEEDED(Convert(aBdAddr, bdAddr))) {
-    status = mInterface->connect(&bdAddr);
+    // Literally the worst, the error is ignored because BLARGH
+    status = mInterface->connect_src(&bdAddr);
+    if (status == BT_STATUS_SUCCESS) {
+      status = mInterface->connect_sink(&bdAddr);
+    }
   } else {
     status = BT_STATUS_PARM_INVALID;
   }
