@@ -64,7 +64,7 @@ public:
   virtual ~GonkPermissionService() {}
   static GonkPermissionService* GetInstance();
   static const char *getServiceName() {
-    return "permission";
+    return "gonk-permission";
   }
 
   static void instantiate();
