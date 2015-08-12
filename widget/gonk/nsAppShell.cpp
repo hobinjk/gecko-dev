@@ -43,9 +43,6 @@
 #include "mozilla/Mutex.h"
 #include "mozilla/Services.h"
 #include "mozilla/TextEvents.h"
-#if ANDROID_VERSION >= 18
-#include "nativewindow/FakeSurfaceComposer.h"
-#endif
 #include "nsAppShell.h"
 #include "mozilla/DebugOnly.h"
 #include "mozilla/dom/Touch.h"
@@ -887,9 +884,6 @@ nsAppShell::Init()
         printf("*** This is stdout. Most of the useful output will be in logcat.\n");
         printf("***\n");
         printf("*****************************************************************\n");
-#if ANDROID_VERSION >= 18 && (defined(MOZ_OMX_DECODER) || defined(MOZ_B2G_CAMERA))
-        android::FakeSurfaceComposer::instantiate();
-#endif
         GonkPermissionService::instantiate();
 
         // Causes the kernel timezone to be set, which in turn causes the
