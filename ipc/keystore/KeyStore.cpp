@@ -292,7 +292,7 @@ void startKeyStoreService()
 {
   android::sp<android::IServiceManager> sm = android::defaultServiceManager();
   android::sp<android::KeyStoreService> keyStoreService = new android::KeyStoreService();
-  sm->addService(String16("android.security.keystore"), keyStoreService);
+  sm->addService(String16("android.security.keystore-gecko"), keyStoreService);
 }
 #else
 void startKeyStoreService() { return; }
